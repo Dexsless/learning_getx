@@ -11,16 +11,18 @@ import 'package:learning_getx/app/modules/dashboard/controllers/dashboard_contro
 
 
 
+
 class IndexView extends GetView {
   const IndexView({super.key});
+
   @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     // Menginisialisasi controller untuk Dashboard menggunakan GetX
     DashboardController controller = Get.put(DashboardController());
-    
+
     // Membuat ScrollController untuk mengontrol scroll pada ListView
     final ScrollController scrollController = ScrollController();
-    
+
     return Scaffold(
       appBar: AppBar(
         // Membuat AppBar dengan judul "Event List"
@@ -44,33 +46,36 @@ Widget build(BuildContext context) {
                 ),
               );
             }
+
             // Jika tidak ada data yang diterima, tampilkan pesan "Tidak ada data"
-            if (snapshot.data!.events!.isEmpty) {
+            if (snapshot.data == null || snapshot.data!.events!.isEmpty) {
               return const Center(child: Text("Tidak ada data"));
             }
 
+            // Tampilkan ListView berisi event
             return ListView.builder(
-              // Menentukan jumlah item berdasarkan panjang data events
               itemCount: snapshot.data!.events!.length,
-              controller: scrollController, // Menggunakan ScrollController untuk ListView
-              shrinkWrap: true, // Membatasi ukuran ListView agar sesuai dengan konten
+              controller: scrollController,
+              shrinkWrap: true,
               itemBuilder: (context, index) {
+                // Ambil event berdasarkan index
+                final event = snapshot.data!.events![index];
+
                 return ZoomTapAnimation(
                   onTap: () {
-                    // Navigasi ke EventDetailView saat item ditekan
-                    Get.to(() => EventDetailView(), id: 1);
+                    // Navigasi ke EventDetailView, kirim data event melalui arguments
+                    Get.to(() => EventDetailView(), arguments: event);
                   },
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Menyusun elemen secara horizontal di kiri
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Menampilkan gambar event
                       Image.network(
-                        'https://picsum.photos/id/${snapshot.data!.events![index].id}/700/300',
-                        fit: BoxFit.cover, // Menyesuaikan gambar dengan area tampilan
+                        'https://picsum.photos/id/${event.id}/700/300',
+                        fit: BoxFit.cover,
                         height: 200,
-                        width: 500,
+                        width: double.infinity,
                         errorBuilder: (context, error, stackTrace) {
-                          // Menangani error jika gambar tidak ditemukan
                           return const SizedBox(
                             height: 200,
                             child: Center(
@@ -79,49 +84,44 @@ Widget build(BuildContext context) {
                           );
                         },
                       ),
-                      const SizedBox(height: 16), // Jarak antara elemen
+                      const SizedBox(height: 16),
                       // Menampilkan judul event
                       Text(
-                        'title',
+                        event.name ?? 'No Title', // Ambil title dari event, atau tampilkan default jika null
                         style: const TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold, // Membuat teks menjadi tebal
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8), // Jarak antara elemen
+                      const SizedBox(height: 8),
                       // Menampilkan deskripsi event
                       Text(
-                        'description',
+                        event.description ?? 'No Description', // Ambil deskripsi atau tampilkan default
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Colors.grey, // Warna teks abu-abu
+                          color: Colors.grey,
                         ),
                       ),
-                      const SizedBox(height: 16), // Jarak antara elemen
+                      const SizedBox(height: 16),
                       Row(
                         children: [
-                          // Ikon lokasi
                           const Icon(
                             Icons.location_on,
-                            color: Colors.red, // Warna ikon merah
+                            color: Colors.red,
                           ),
-                          const SizedBox(width: 8), // Jarak antara ikon dan teks
+                          const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'location', // Lokasi event
+                              event.location ?? 'No Location', // Ambil lokasi event
                               style: const TextStyle(
                                 fontSize: 16,
-                                color: Colors.black, // Warna teks hitam
+                                color: Colors.black,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      // Garis pembatas antara item
-                      Divider(
-                        height: 10, // Tinggi divider
-                      ),
-                      SizedBox(height: 16), // Jarak setelah divider
+                      const Divider(height: 32),
                     ],
                   ),
                 );
@@ -129,64 +129,6 @@ Widget build(BuildContext context) {
             );
           },
         ),
-      ),
-    );
-  }
-
-  ZoomTapAnimation eventList() {
-    return ZoomTapAnimation(
-      onTap: () {
-        Get.to(() => EventDetailView(), id: 1);
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.network(
-            'https://picsum.photos/seed/picsum/200/300',
-            fit: BoxFit.cover,
-            height: 200,
-            width: double.infinity,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'title',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'description',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(
-                Icons.location_on,
-                color: Colors.red,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'location',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Divider(
-            height: 10,
-          ),
-          SizedBox(height: 16),
-        ],
       ),
     );
   }
